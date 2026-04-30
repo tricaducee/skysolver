@@ -6,7 +6,7 @@
 /*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/30 22:35:22 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/04/30 23:17:08 by trgoel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,8 +207,13 @@ void	pre_generate(unsigned int **tab[3], unsigned int tab_size)
 	{
 		smart_replace_col(tab[1], tab[0], tab_size, box);
 		smart_replace_line(tab[1], tab[0], tab_size, box);
+		printf("PASSES %u\n", box);
+		print_tab_vu(tab[1], tab_size);
+		write(1, "\n", 1);
 		box--;
 	}
+	print_tab_vu(tab[0], tab_size);
+	write(1, "\n", 1);
 }
 
 void	add_manual_number(unsigned int **tab, t_coor t,
@@ -236,9 +241,9 @@ int	main(int ac, char **av)
 	if (!check_tab(tab[0], tab_size + 2))
 		return (ft_putstr_fd(2, "Error\n"));
 	pre_generate(tab, tab_size);
-	add_manual_number(tab[0], (t_coor){2, 1}, 3, tab_size);
-	add_manual_number(tab[0], (t_coor){4, 2}, 5, tab_size);
-	add_manual_number(tab[0], (t_coor){7, 1}, 4, tab_size);
+	add_manual_number(tab[0], (t_coor){2, 1}, 6, tab_size);
+	add_manual_number(tab[0], (t_coor){3, 1}, 2, tab_size);
+	add_manual_number(tab[0], (t_coor){7, 2}, 2, tab_size);
 	coor.x = 0;
 	coor.y = 0;
 	#ifdef ANIMATE
@@ -246,7 +251,7 @@ int	main(int ac, char **av)
 		while (i++ < tab_size + 2)
 			write(1, "\n", 1);
 	#endif
-	if (!sky_solver(tab[0], tab[1], /* new_coor( */coor /*, tab_size, tab[0])*/, tab_size))
+	if (!sky_solver(tab[0], tab[1], new_coor((t_coor){0,0}, tab_size, tab[0]), tab_size))
 		return (ft_putstr_fd(2, "\033[0;31mError\n"));
 	else
 		print_tab_vu(tab[0], tab_size);
