@@ -1,0 +1,35 @@
+digraph {
+	tooltip=" "
+	bgcolor="#E8CADB"
+	graph [fontname=Arial, nodesep=0.125, ranksep=0.25];
+	node [fontcolor=white, fontname=Arial, height=0, shape=box, style=filled, width=0];
+	edge [fontname=Arial];
+	"(below main)" [color="#ff0000", fontcolor="#ffffff", fontsize="10.00", label="libc.so.6\n(below main)\n100.00%\n(0.00%)\n2×"];
+	"(below main)" -> main [arrowsize="1.00", color="#ff0000", fontcolor="#ff0000", fontsize="10.00", label="100.00%\n1×", labeldistance="4.00", penwidth="4.00"];
+	"0x0000000000020290" [color="#ff0000", fontcolor="#ffffff", fontsize="10.00", label="ld-linux-x86-64.so.2\n0x0000000000020290\n100.00%\n(0.00%)\n0×"];
+	"0x0000000000020290" -> "(below main)" [arrowsize="1.00", color="#ff0000", fontcolor="#ff0000", fontsize="10.00", label="100.00%\n1×", labeldistance="4.00", penwidth="4.00"];
+	"check_column_and_line_bit_shift" [color="#0c8090", fontcolor="#ffffff", fontsize="10.00", label="sky\ncheck_column_and_line_bit_shift\n22.08%\n(22.08%)\n634621351×"];
+	"check_min_index" [color="#0d1b77", fontcolor="#ffffff", fontsize="10.00", label="sky\ncheck_min_index\n3.32%\n(3.32%)\n112716324×"];
+	"check_vue_column" [color="#0d4582", fontcolor="#ffffff", fontsize="10.00", label="sky\ncheck_vue_column\n11.93%\n(11.93%)\n111252617×"];
+	"check_vue_column_rev" [color="#0d1274", fontcolor="#ffffff", fontsize="10.00", label="sky\ncheck_vue_column_rev\n1.23%\n(1.23%)\n100159675×"];
+	"check_vue_line" [color="#0d387f", fontcolor="#ffffff", fontsize="10.00", label="sky\ncheck_vue_line\n9.42%\n(9.42%)\n99688200×"];
+	"check_vue_line_rev" [color="#0d1675", fontcolor="#ffffff", fontsize="10.00", label="sky\ncheck_vue_line_rev\n2.09%\n(2.09%)\n95637090×"];
+	"is_end" [color="#0d1074", fontcolor="#ffffff", fontsize="10.00", label="sky\nis_end\n0.77%\n(0.77%)\n90660214×"];
+	main [color="#ff0000", fontcolor="#ffffff", fontsize="10.00", label="sky\nmain\n100.00%\n(0.00%)\n1×"];
+	main -> "sky_solver" [arrowsize="1.00", color="#ff0000", fontcolor="#ff0000", fontsize="10.00", label="100.00%\n1×", labeldistance="4.00", penwidth="4.00"];
+	"new_coor" [color="#0d1174", fontcolor="#ffffff", fontsize="10.00", label="sky\nnew_coor\n1.03%\n(1.03%)\n90660213×"];
+	"put_box" [color="#ef6703", fontcolor="#ffffff", fontsize="10.00", label="sky\nput_box\n89.42%\n(39.34%)\n177853361×"];
+	"put_box" -> "check_column_and_line_bit_shift" [arrowsize="0.47", color="#0c8090", fontcolor="#0c8090", fontsize="10.00", label="22.08%\n634621351×", labeldistance="0.88", penwidth="0.88"];
+	"put_box" -> "check_min_index" [arrowsize="0.35", color="#0d1b77", fontcolor="#0d1b77", fontsize="10.00", label="3.32%\n112716324×", labeldistance="0.50", penwidth="0.50"];
+	"put_box" -> "check_vue_column" [arrowsize="0.35", color="#0d4582", fontcolor="#0d4582", fontsize="10.00", label="11.93%\n111252617×", labeldistance="0.50", penwidth="0.50"];
+	"put_box" -> "check_vue_column_rev" [arrowsize="0.35", color="#0d1274", fontcolor="#0d1274", fontsize="10.00", label="1.23%\n100159675×", labeldistance="0.50", penwidth="0.50"];
+	"put_box" -> "check_vue_line" [arrowsize="0.35", color="#0d387f", fontcolor="#0d387f", fontsize="10.00", label="9.42%\n99688200×", labeldistance="0.50", penwidth="0.50"];
+	"put_box" -> "check_vue_line_rev" [arrowsize="0.35", color="#0d1675", fontcolor="#0d1675", fontsize="10.00", label="2.09%\n95637090×", labeldistance="0.50", penwidth="0.50"];
+	"sky_solver" [color="#ff0000", fontcolor="#ffffff", fontsize="10.00", label="sky\nsky_solver\n100.00%\n(0.00%)\n1×"];
+	"sky_solver" -> "sky_solver'2" [arrowsize="1.00", color="#ff0000", fontcolor="#ff0000", fontsize="10.00", label="100.00%\n5×", labeldistance="4.00", penwidth="4.00"];
+	"sky_solver'2" [color="#ff0000", fontcolor="#ffffff", fontsize="10.00", label="sky\nsky_solver'2\n100.00%\n(8.78%)\n90660213×"];
+	"sky_solver'2" -> "is_end" [arrowsize="0.35", color="#0d1074", fontcolor="#0d1074", fontsize="10.00", label="0.77%\n90660209×", labeldistance="0.50", penwidth="0.50"];
+	"sky_solver'2" -> "new_coor" [arrowsize="0.35", color="#0d1174", fontcolor="#0d1174", fontsize="10.00", label="1.03%\n90660208×", labeldistance="0.50", penwidth="0.50"];
+	"sky_solver'2" -> "put_box" [arrowsize="0.95", color="#ef6703", fontcolor="#ef6703", fontsize="10.00", label="89.42%\n177853356×", labeldistance="3.58", penwidth="3.58"];
+	"sky_solver'2" -> "sky_solver'2" [arrowsize="1.00", color="#ff0000", fontcolor="#ff0000", fontsize="10.00", label="90660208×", labeldistance="4.00", penwidth="4.00"];
+}
