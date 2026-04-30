@@ -6,7 +6,7 @@
 /*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:24 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/28 12:24:17 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/04/30 21:46:54 by trgoel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,10 @@ void	print_tab_vu(unsigned int **tab, unsigned int tab_size)
 				|| (j == tab_size - 1 && i == tab_size - 1))
 				(void)write(1, " ", 1);
 			else
+			{
 				ft_putnbr(tab[i][j]);
+				//write (1, " ", 1);
+			}
 			if (!(tab[i][j] / 10) && j != tab_size - 1)
 				(void)write(1, " ", 1);
 			++j;

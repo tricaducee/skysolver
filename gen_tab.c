@@ -6,7 +6,7 @@
 /*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:10 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/28 07:05:11 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/04/30 22:27:16 by trgoel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,12 +89,12 @@ unsigned int	**gen_tab(unsigned int tab_size, char *user_input)
 			free_tab(tab);
 			return (NULL);
 		}
-		tab[i++][tab_size + 2] = 0;
+		tab[i++][tab_size + 2]= (1 << tab_size);
 	}
 	j = 0;
 	tab[i--] = NULL;
 	while (j < tab_size + 3)
-		tab[i][j++] = 0;
+		tab[i][j++] = (1 << tab_size);
 	put_input(tab, tab_size + 2, user_input);
 	return (tab);
 }

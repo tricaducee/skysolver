@@ -6,7 +6,7 @@
 /*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:43 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/28 08:42:47 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/04/30 22:24:02 by trgoel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,18 +23,20 @@ typedef struct S_coor
 //---------------SKY_SOLVER---------------//
 
 int				is_end(t_coor coor, unsigned int tab_size);
-t_coor			new_coor(t_coor coor, unsigned int tab_size);
-int				check_column_and_line(unsigned int **tab,
-					t_coor coor, unsigned int box);
-unsigned int	put_box(unsigned int **tab, t_coor coor,
+t_coor			new_coor(t_coor coor, unsigned int tab_size, unsigned int **tab);
+int				check_column_and_line_bit_shift(unsigned int **tab,
+					t_coor coor, unsigned int tab_size, unsigned int box);
+unsigned int	put_box(unsigned int **tab, unsigned int **ref, t_coor coor,
 					unsigned int tab_size, unsigned int box);
-int				sky_solver(unsigned int	**tab, t_coor coor,
+int				sky_solver(unsigned int	**tab, unsigned int **ref, t_coor coor,
 					unsigned int tab_size);
 
 //---------------CHECK_VUE---------------//
 
-int				check_min_index(unsigned int **tab, t_coor coor,
-					unsigned int tab_size, unsigned int box);
+// int				check_min_index(unsigned int **tab, t_coor coor,
+// 					unsigned int tab_size, unsigned int box);
+int				check_min_index(unsigned int **tab,
+					t_coor coor, unsigned int box);
 int				check_vue_column(unsigned int **tab,
 					t_coor coor, unsigned int tab_size);
 int				check_vue_column_rev(unsigned int **tab,
