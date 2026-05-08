@@ -6,7 +6,7 @@
 /*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:43 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/30 22:24:02 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/05/08 21:51:28 by trgoel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,23 @@ typedef struct S_coor
 	unsigned int	y;
 }				t_coor;
 
+typedef struct S_all
+{
+	unsigned int	**map;
+	unsigned int	**heatmap;
+	t_coor			*path_priority;
+	unsigned int	tab_size;
+	unsigned int	square_tab_size;
+	unsigned int	path_size;
+}	t_all;
+
 //---------------SKY_SOLVER---------------//
 
-int				is_end(t_coor coor, unsigned int tab_size);
-t_coor			new_coor(t_coor coor, unsigned int tab_size, unsigned int **tab);
+int				is_end(unsigned int curr_i, unsigned int square_tab_size);
 int				check_column_and_line_bit_shift(unsigned int **tab,
 					t_coor coor, unsigned int tab_size, unsigned int box);
-unsigned int	put_box(unsigned int **tab, unsigned int **ref, t_coor coor,
-					unsigned int tab_size, unsigned int box);
-int				sky_solver(unsigned int	**tab, unsigned int **ref, t_coor coor,
-					unsigned int tab_size);
+unsigned int	put_box(t_all *all, t_coor curr, unsigned int box);
+int				sky_solver(t_all *all, unsigned int curr_i);
 
 //---------------CHECK_VUE---------------//
 

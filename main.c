@@ -6,7 +6,7 @@
 /*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/30 23:17:08 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/05/08 23:09:33 by trgoel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,20 +198,21 @@ void	fuse_tabs(unsigned int	**tab[3], unsigned int tab_size)
 
 void	pre_generate(unsigned int **tab[3], unsigned int tab_size)
 {
-	unsigned int	box;
+	//unsigned int	box;
+
 	pre_compute_lines(tab[1], tab_size);
 	pre_compute_column(tab[2], tab_size);
 	fuse_tabs(tab, tab_size);
-	box = tab_size;
-	while (box >= 1)
-	{
-		smart_replace_col(tab[1], tab[0], tab_size, box);
-		smart_replace_line(tab[1], tab[0], tab_size, box);
-		printf("PASSES %u\n", box);
-		print_tab_vu(tab[1], tab_size);
-		write(1, "\n", 1);
-		box--;
-	}
+	//box = tab_size;
+	//while (box >= 1)
+	//{
+	//	//smart_replace_col(tab[1], tab[0], tab_size, box);
+	//	//smart_replace_line(tab[1], tab[0], tab_size, box);
+	//	printf("PASSES %u\n", box);
+	//	print_tab_vu(tab[1], tab_size);
+	//	write(1, "\n", 1);
+	//	box--;
+	//}
 	print_tab_vu(tab[0], tab_size);
 	write(1, "\n", 1);
 }
@@ -225,11 +226,85 @@ void	add_manual_number(unsigned int **tab, t_coor t,
 
 }
 
+int	get_path(t_all *all)
+{
+	const unsigned int	tab_size = all->tab_size;
+	t_coor			i;
+	unsigned int	curr_max;
+
+	all->path_priority = malloc(sizeof(t_coor) * (all->square_tab_size));
+	if (!all->path_priority)
+		return (printf("sa mrsh pa (malloc)\n"));
+	//curr_max = all->tab_size;
+	curr_max = 1;
+	all->path_size = 0;
+	while (curr_max >= 1)
+	{
+		i.y = 1;
+		while (i.y <= tab_size)
+		{
+			i.x = 1;
+			while (i.x <= tab_size)
+			{
+				if (all->map[i.y][i.x] == 0)
+					all->path_priority[all->path_size++] = i;
+				i.x++;
+			}
+			i.y++;
+		}
+		--curr_max;
+	}
+	return (0);
+}
+
+// int	get_path(t_all *all)
+// {
+// 	const unsigned int	tab_size = all->tab_size;
+// 	t_coor			i;
+// 	unsigned int	curr_max;
+
+// 	all->path_priority = malloc(sizeof(t_coor) * (all->square_tab_size));
+// 	if (!all->path_priority)
+// 		return (printf("sa mrsh pa (malloc)\n"));
+// 	curr_max = tab_size;
+// 	all->path_size = 0;
+// 	while (curr_max >= 1)
+// 	{
+// 		i.y = 1;
+// 		while (i.y <= tab_size)
+// 		{
+// 			i.x = 1;
+// 			while (i.x <= tab_size)
+// 			{
+// 				if (all->heatmap[i.y][i.x] == curr_max && all->map[i.y][i.x] == 0)
+// 					all->path_priority[all->path_size++] = i;
+// 				i.x++;
+// 			}
+// 			i.y++;
+// 		}
+// 		--curr_max;
+// 	}
+// 	return (0);
+// }
+
+void	print_paths(t_all *all)
+{
+	unsigned int	i;
+	
+	i = 0;
+	while (i < all->path_size)
+	{
+		printf("(%u, %u): %u\n", all->path_priority[i].x, all->path_priority[i].y, all->heatmap[all->path_priority[i].y][all->path_priority[i].x]);
+		fflush(stdout);
+		i++;
+	}
+}
+
 int	main(int ac, char **av)
 {
 	unsigned int	tab_size;
 	unsigned int	**tab[3];
-	t_coor			coor;
+	t_all			all;
 
 	if (ac != 2)
 		return (ft_putstr_fd(2, "Error\n"));
@@ -241,17 +316,29 @@ int	main(int ac, char **av)
 	if (!check_tab(tab[0], tab_size + 2))
 		return (ft_putstr_fd(2, "Error\n"));
 	pre_generate(tab, tab_size);
-	add_manual_number(tab[0], (t_coor){2, 1}, 6, tab_size);
-	add_manual_number(tab[0], (t_coor){3, 1}, 2, tab_size);
-	add_manual_number(tab[0], (t_coor){7, 2}, 2, tab_size);
-	coor.x = 0;
-	coor.y = 0;
+	free(tab[2]);
 	#ifdef ANIMATE
 		unsigned int	i = 0;
 		while (i++ < tab_size + 2)
 			write(1, "\n", 1);
 	#endif
-	if (!sky_solver(tab[0], tab[1], new_coor((t_coor){0,0}, tab_size, tab[0]), tab_size))
+	all.map = tab[0];
+	all.heatmap = tab[1];
+	all.square_tab_size = tab_size * tab_size;
+	all.tab_size = tab_size;
+	// add_manual_number(all.map, (t_coor){1, 1}, 4, all.tab_size);
+	// add_manual_number(all.map, (t_coor){3, 2}, 1, all.tab_size);
+	// add_manual_number(all.map, (t_coor){3, 4}, 5, all.tab_size);
+	// add_manual_number(all.map, (t_coor){2, 4}, 1, all.tab_size);
+	// add_manual_number(all.map, (t_coor){5, 5}, 3, all.tab_size);
+	// add_manual_number(all.map, (t_coor){7, 3}, 4, all.tab_size);
+	// add_manual_number(all.map, (t_coor){4, 2}, 7, all.tab_size);
+	print_tab_vu(tab[0], tab_size);
+	if (get_path(&all))
+		return (1);
+	//print_paths(&all);
+	//printf("%u\n", all.path_size);
+	if (!sky_solver(&all, 0))
 		return (ft_putstr_fd(2, "\033[0;31mError\n"));
 	else
 		print_tab_vu(tab[0], tab_size);

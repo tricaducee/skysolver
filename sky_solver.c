@@ -6,35 +6,18 @@
 /*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:34 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/30 22:31:22 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/05/08 23:09:46 by trgoel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "sky_solver.h"
 #include <unistd.h>
 
-int	is_end(t_coor coor, unsigned int tab_size)
+int	is_end(unsigned int curr_i, unsigned int path_size)
 {
-	if (!(coor.x + 1 < tab_size) && !(coor.y + 1 < tab_size))
+	if (curr_i == path_size - 1)
 		return (1);
 	return (0);
-}
-
-t_coor	new_coor(t_coor coor, unsigned int tab_size, unsigned int **tab)
-{
-	while (1)
-	{
-		if (coor.x + 1 < tab_size)
-			++coor.x;
-		else if (coor.y + 1 < tab_size)
-		{
-			coor.x = 0;
-			++coor.y;
-		}
-		if (tab[coor.y + 1][coor.x + 1] == 0 || (coor.y + 1 == tab_size && coor.x + 1 == tab_size))
-			return (coor);
-	}
-	return (coor);
 }
 
 int	check_column_and_line_bit_shift(unsigned int **tab, t_coor coor, unsigned int tab_size, unsigned int box)
@@ -42,75 +25,81 @@ int	check_column_and_line_bit_shift(unsigned int **tab, t_coor coor, unsigned in
 	const unsigned int	i = (1 << (box - 1));
 	const unsigned int	delta = tab_size + 2;
 
-	if (!(tab[delta][coor.x + 1] & i) && !(tab[coor.y + 1][delta] & i))
+	if (!(tab[delta][coor.x] & i) && !(tab[coor.y][delta] & i))
 	{
-		tab[delta][coor.x + 1] |= i;
-		tab[coor.y + 1][delta] |= i;
+		tab[delta][coor.x] |= i;
+		tab[coor.y][delta] |= i;
 		return (1);
 	}
 	return (0);
 }
 
-unsigned int	put_box(unsigned int **tab, unsigned int **ref, t_coor coor,
-	unsigned int tab_size, unsigned int box)
+unsigned int	put_box(t_all *all, t_coor coor, unsigned int box)
 {
-	t_coor	boxes_save;
+	t_coor			boxes_save;
+	unsigned int	**tab;
+
+	tab = all->map;
+	boxes_save.x = tab[all->tab_size + 2][coor.x];
+	boxes_save.y = tab[coor.y][all->tab_size + 2];
+	//printf("trying: (%u, %u)\n", coor.x, coor.y);
 	while (1)
 	{
-		boxes_save.x = tab[tab_size + 2][coor.x + 1];
-		boxes_save.y = tab[coor.y + 1][tab_size + 2];
-		tab[coor.y + 1][coor.x + 1] = box;
-		if (
-			check_column_and_line_bit_shift(tab, coor, tab_size, box)
-			&& check_min_index(ref, coor, box)
-			&& check_vue_column(tab, coor, tab_size)
-			&& check_vue_column_rev(tab, coor, tab_size)
-			&& check_vue_line(tab, coor, tab_size)
-			&& check_vue_line_rev(tab, coor, tab_size))
+		tab[coor.y][coor.x] = box;
+		if (check_column_and_line_bit_shift(tab, coor, all->tab_size, box)
+			&& check_vue_line(tab, coor, all->tab_size)
+			&& check_vue_column(tab, coor, all->tab_size)
+			&& check_vue_line_rev(tab, coor, all->tab_size)
+			&& check_vue_column_rev(tab, coor, all->tab_size)
+		)
 			return (box);
-		++box;
-		tab[tab_size + 2][coor.x + 1] = boxes_save.x;
-		tab[coor.y + 1][tab_size + 2] = boxes_save.y;
-		if (box > tab_size)
+		tab[all->tab_size + 2][coor.x] = boxes_save.x;
+		tab[coor.y][all->tab_size + 2] = boxes_save.y;
+		--box;
+		if (!box)
 			break ;
 	}
 	return (0);
 }
 
-int	sky_solver(unsigned int	**tab, unsigned int **ref, t_coor coor, unsigned int tab_size)
+int	sky_solver(t_all *all, unsigned int coor_i)
 {
 	unsigned int	box;
 	t_coor			boxes_save;
 	int				ret;
+	unsigned int	**tab;
+	const t_coor	coor = all->path_priority[coor_i];	
 
-	box = 1;
+	//box = all->tab_size;
+	box = all->heatmap[coor.y][coor.x];
+	tab = all->map;
+	boxes_save.x = tab[all->tab_size + 2][coor.x];
+	boxes_save.y = tab[coor.y][all->tab_size + 2];
 	while (1)
 	{
-		boxes_save.x = tab[tab_size + 2][coor.x + 1];
-		boxes_save.y = tab[coor.y + 1][tab_size + 2];
-		box = put_box(tab, ref, coor, tab_size, box);
+		box = put_box(all, coor, box);
 		if (!box)
 		{
-			tab[coor.y + 1][coor.x + 1] = 0;
+			tab[coor.y][coor.x] = 0;
 			return (0);
 		}
 		#ifdef ANIMATE
-			up_lines(tab_size + 2);
+			up_lines(all->tab_size + 2);
 		#endif
-		if (is_end(coor, tab_size))
+		if (is_end(coor_i, all->path_size))
 			return (1);
 		#ifdef ANIMATE
-			print_tab_vu(tab, tab_size);
+			print_tab_vu(tab, all->tab_size);
 		#endif
-		ret = sky_solver(tab, ref, new_coor(coor, tab_size, tab), tab_size);
+		ret = sky_solver(all, coor_i + 1);
 		if (ret)
 			return (ret);
-		tab[tab_size + 2][coor.x + 1] = boxes_save.x;
-		tab[coor.y + 1][tab_size + 2] = boxes_save.y;
-		++box;
-		if (box > tab_size)
+		tab[all->tab_size + 2][coor.x] = boxes_save.x;
+		tab[coor.y][all->tab_size + 2] = boxes_save.y;
+		--box;
+		if (!box)
 		{
-			tab[coor.y + 1][coor.x + 1] = 0;
+			tab[coor.y][coor.x] = 0;
 			return (0);
 		}
 	}
