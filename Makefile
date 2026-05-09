@@ -1,5 +1,6 @@
 SRCS	:= check_tab.c  check_vue.c  gen_tab.c  main.c  print_tab.c  sky_solver.c  utils.c
-OBJS	:= $(SRCS:%.c=%.o)
+BIN_DIR	:= ./bin
+OBJS	:= $(SRCS:%.c=$(BIN_DIR)/%.o)
 
 FLAGS	:= -Wall -Wextra -g
 CC		:= /usr/bin/gcc
@@ -18,10 +19,13 @@ endif
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
+$(TARGET): $(BIN_DIR) $(OBJS)
 	$(CC) $(FLAGS) $(OBJS) -o $(TARGET)
 
-%.o: %.c
+$(BIN_DIR)/%.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@
 
 clean:
