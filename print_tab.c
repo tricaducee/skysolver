@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:24 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 17:43:34 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 19:53:21 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void	print_tab_vu_coor(unsigned int **tab, t_coor coor, unsigned int tab_size)
 			else
 			{
 				if (coor.y == i && coor.x == j)
-					ft_putstr_fd(1, "\033[1;31;47m");
+					ft_putstr_fd(1, "\033[1;7m");
 				else if (i == 0 || i == tab_size - 1 || j == 0 || j == tab_size - 1)
 					ft_putstr_fd(1, "\033[0;34m");
 				ft_putnbr(tab[i][j]);

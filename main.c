@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 18:19:16 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 20:09:02 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,12 +229,20 @@ void	pre_generate(unsigned int **tab[3], unsigned int tab_size)
 void	add_manual_number(unsigned int **tab, t_coor t,
 	unsigned int box, unsigned int tab_size)
 {
-	tab[t.y][t.x] = box;
 	if (t.y > 0 && t.y < tab_size + 1 && t.x > 0 && t.x < tab_size + 1)
 	{
-		tab[tab_size + 2][t.x] |= 1 << (box - 1);
-		tab[t.y][tab_size + 2] |= 1 << (box - 1);
+		if (tab[t.y][t.x])
+		{
+			tab[tab_size + 2][t.x] &= ~(1 << (tab[t.y][t.x] - 1));
+			tab[t.y][tab_size + 2] &= ~(1 << (tab[t.y][t.x] - 1));
+		}
+		if (box)
+		{
+			tab[tab_size + 2][t.x] |= 1 << (box - 1);
+			tab[t.y][tab_size + 2] |= 1 << (box - 1);
+		}
 	}
+	tab[t.y][t.x] = box;
 
 }
 
@@ -312,6 +320,28 @@ void	print_paths(t_all *all)
 	}
 }
 
+int last_check(t_all *all)
+{
+	t_coor	coor;
+	const unsigned int tab_size = all->tab_size;
+
+	coor.y = 0;
+	while (++coor.y <= tab_size)
+	{
+		coor.x = 0;
+		while (++coor.x <= tab_size)
+		{
+			if (!check_vue_line(all->map, coor, tab_size)
+				//|| !check_vue_line_rev(all->map, coor, tab_size)
+				|| !check_vue_column(all->map, coor, tab_size)
+				//|| !check_vue_column_rev(all->map, coor, tab_size)
+			)
+				return (1);
+		}
+	}
+	return (0);
+}
+
 int	main(int ac, char **av)
 {
 	unsigned int	tab_size;
@@ -349,13 +379,15 @@ int	main(int ac, char **av)
 	//print_paths(&all);
 	//printf("%u\n", all.path_size);
 	if (!sky_solver(&all, 0))
-	return (ft_putstr_fd(2, "\033[0;31mError\n"));
+		return (ft_putstr_fd(2, "\033[0;31mError\n"));
 	else
 	{
 		clock_gettime(CLOCK_MONOTONIC, &end);
 		#ifndef ANIMATE
-		up_lines(tab_size + 2);
+		up_lines(tab_size + 3);
 		#endif
+		if (last_check(&all))
+			printf("Failed last check. something is wrong                                                             \n");
 		print_tab_vu_coor(tab[0], (t_coor){0, 0}, tab_size);
 		printf("Solved in : %lf secondes\n", (end.tv_sec - start.tv_sec) + 
                           (end.tv_nsec - start.tv_nsec) / 1000000000.0);

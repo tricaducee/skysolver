@@ -9,6 +9,7 @@ void	sky_editor(t_all *all)
 	struct termios	new_term;
 	t_coor			coor;
 	char			c;
+	unsigned int	n;
 	tcgetattr(STDIN_FILENO, &old_term);
 	new_term = old_term;
 	new_term.c_lflag &= ~(ECHO | ICANON);
@@ -25,7 +26,11 @@ void	sky_editor(t_all *all)
 		if (c == '\n')
 			break ;
 		else if (c <= '9' && c >= '0')
-			add_manual_number(all->map, coor, c - '0', all->tab_size);
+		{
+			n = c - '0';
+			if (n <= all->tab_size)
+				add_manual_number(all->map, coor, c - '0', all->tab_size);
+		}
 		else if (c == '\033')
 		{
 			read(STDIN_FILENO, &c, 1);

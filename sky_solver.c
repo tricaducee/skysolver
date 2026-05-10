@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:34 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 17:50:05 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 20:07:52 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,13 @@ unsigned int	put_box(t_all *all, t_coor coor, unsigned int box)
 		tab[coor.y][coor.x] = box;
 		if (check_column_and_line_bit_shift(tab, coor, all->tab_size, box)
 			&& check_vue_line(tab, coor, all->tab_size)
-			&& check_vue_column(tab, coor, all->tab_size)
-			&& check_vue_line_rev(tab, coor, all->tab_size)
-			&& check_vue_column_rev(tab, coor, all->tab_size)
+			&& check_line_vue_lower_bound(all, coor)
+			&& check_line_vue_upper_bound(all, coor)
+			&& check_col_vue_lower_bound(all, coor)
+			&& check_col_vue_upper_bound(all, coor)
+			//&& check_vue_column(tab, coor, all->tab_size)
+			//&& check_vue_line_rev(tab, coor, all->tab_size)
+			//&& check_vue_column_rev(tab, coor, all->tab_size)
 		)
 			return (box);
 		tab[all->tab_size + 2][coor.x] = boxes_save.x;

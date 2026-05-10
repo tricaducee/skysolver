@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:43 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 17:28:47 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 19:49:06 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,10 @@ unsigned int	put_box(t_all *all, t_coor curr, unsigned int box);
 int				sky_solver(t_all *all, unsigned int curr_i);
 
 //---------------CHECK_VUE---------------//
-
+int				check_col_vue_lower_bound(t_all *all, t_coor coor);
+int				check_col_vue_upper_bound(t_all *all, t_coor coor);
+int				check_line_vue_lower_bound(t_all *all, t_coor coor);
+int				check_line_vue_upper_bound(t_all *all, t_coor coor);
 // int				check_min_index(unsigned int **tab, t_coor coor,
 // 					unsigned int tab_size, unsigned int box);
 int				check_min_index(unsigned int **tab,

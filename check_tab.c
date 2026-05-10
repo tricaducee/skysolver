@@ -3,18 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   check_tab.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ldebarno <marvin@42lausanne.ch>            +#+  +:+       +#+        */
+/*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 20:57:10 by ldebarno          #+#    #+#             */
-/*   Updated: 2024/09/01 20:59:08 by ldebarno         ###   ########.fr       */
+/*   Updated: 2026/05/10 20:09:47 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "sky_solver.h"
 
 unsigned int	check_input(char *s)
 {
 	unsigned int	ret;
+	char			*tmp;
 
 	ret = 0;
+	tmp = s;
 	if (*s == ' ')
 		return (ret);
 	while (*s)
@@ -29,6 +33,8 @@ unsigned int	check_input(char *s)
 		else if (*s)
 			return (0);
 	}
+	if (ret == 1)
+		return (ft_atoi(tmp));
 	if (ret)
 		++ret;
 	if (!(ret % 4) && (ret / 4) > 2)
