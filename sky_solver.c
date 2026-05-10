@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sky_solver.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:34 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/08 23:09:46 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/05/10 17:50:05 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ int	sky_solver(t_all *all, unsigned int coor_i)
 		if (is_end(coor_i, all->path_size))
 			return (1);
 		#ifdef ANIMATE
-			print_tab_vu(tab, all->tab_size);
+			print_tab_vu_coor(tab, coor, all->tab_size);
 		#endif
 		ret = sky_solver(all, coor_i + 1);
 		if (ret)

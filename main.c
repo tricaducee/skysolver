@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/08 23:09:33 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/05/10 18:19:16 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 void	pre_compute_lines(unsigned int **tab, unsigned int tab_size)
 {
@@ -31,7 +32,11 @@ void	pre_compute_lines(unsigned int **tab, unsigned int tab_size)
 		while (box < tab_size)
 			tab[val][i++] = box++;
 		while (i < end_i)
-			tab[val][i++] = box;
+		{
+			if (!tab[val][i])
+				tab[val][i] = box;
+			++i;
+		}
 		while (i <= tab_size)
 			tab[val][i++] = box--;
 		++val;
@@ -54,7 +59,11 @@ void	pre_compute_column(unsigned int **tab, unsigned int tab_size)
 		while (box < tab_size)
 			tab[i++][val] = box++;
 		while (i < end_i)
-			tab[i++][val] = box;
+		{
+			if (!tab[i][val])
+				tab[i][val] = box;
+			++i;
+		}
 		while (i <= tab_size)
 			tab[i++][val] = box--;
 		++val;
@@ -213,16 +222,19 @@ void	pre_generate(unsigned int **tab[3], unsigned int tab_size)
 	//	write(1, "\n", 1);
 	//	box--;
 	//}
-	print_tab_vu(tab[0], tab_size);
-	write(1, "\n", 1);
+	// print_tab_vu(tab[0], tab_size);
+	// write(1, "\n", 1);
 }
 
 void	add_manual_number(unsigned int **tab, t_coor t,
 	unsigned int box, unsigned int tab_size)
 {
 	tab[t.y][t.x] = box;
-	tab[tab_size + 2][t.x] |= 1 << (box - 1);
-	tab[t.y][tab_size + 2] |= 1 << (box - 1);
+	if (t.y > 0 && t.y < tab_size + 1 && t.x > 0 && t.x < tab_size + 1)
+	{
+		tab[tab_size + 2][t.x] |= 1 << (box - 1);
+		tab[t.y][tab_size + 2] |= 1 << (box - 1);
+	}
 
 }
 
@@ -304,6 +316,7 @@ int	main(int ac, char **av)
 {
 	unsigned int	tab_size;
 	unsigned int	**tab[3];
+	struct timespec	start, end;
 	t_all			all;
 
 	if (ac != 2)
@@ -315,13 +328,6 @@ int	main(int ac, char **av)
 		return (1);
 	if (!check_tab(tab[0], tab_size + 2))
 		return (ft_putstr_fd(2, "Error\n"));
-	pre_generate(tab, tab_size);
-	free(tab[2]);
-	#ifdef ANIMATE
-		unsigned int	i = 0;
-		while (i++ < tab_size + 2)
-			write(1, "\n", 1);
-	#endif
 	all.map = tab[0];
 	all.heatmap = tab[1];
 	all.square_tab_size = tab_size * tab_size;
@@ -333,16 +339,29 @@ int	main(int ac, char **av)
 	// add_manual_number(all.map, (t_coor){5, 5}, 3, all.tab_size);
 	// add_manual_number(all.map, (t_coor){7, 3}, 4, all.tab_size);
 	// add_manual_number(all.map, (t_coor){4, 2}, 7, all.tab_size);
-	print_tab_vu(tab[0], tab_size);
+	sky_editor(&all);
+	// write(1, "\n", 1);
+	//print_tab_vu(tab[0], tab_size);
+	clock_gettime(CLOCK_MONOTONIC, &start);
+	pre_generate(tab, tab_size);
 	if (get_path(&all))
-		return (1);
+	return (1);
 	//print_paths(&all);
 	//printf("%u\n", all.path_size);
 	if (!sky_solver(&all, 0))
-		return (ft_putstr_fd(2, "\033[0;31mError\n"));
+	return (ft_putstr_fd(2, "\033[0;31mError\n"));
 	else
-		print_tab_vu(tab[0], tab_size);
+	{
+		clock_gettime(CLOCK_MONOTONIC, &end);
+		#ifndef ANIMATE
+		up_lines(tab_size + 2);
+		#endif
+		print_tab_vu_coor(tab[0], (t_coor){0, 0}, tab_size);
+		printf("Solved in : %lf secondes\n", (end.tv_sec - start.tv_sec) + 
+                          (end.tv_nsec - start.tv_nsec) / 1000000000.0);
+	}
 	free_tab(tab[0]);
 	free_tab(tab[1]);
+	free_tab(tab[2]);
 	return (0);
 }

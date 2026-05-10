@@ -1,4 +1,4 @@
-SRCS	:= check_tab.c  check_vue.c  gen_tab.c  main.c  print_tab.c  sky_solver.c  utils.c
+SRCS	:= check_tab.c  check_vue.c  gen_tab.c  main.c  print_tab.c  sky_solver.c  utils.c	sky_editor.c
 BIN_DIR	:= ./bin
 OBJS	:= $(SRCS:%.c=$(BIN_DIR)/%.o)
 

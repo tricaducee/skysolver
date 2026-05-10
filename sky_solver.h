@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sky_solver.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:43 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/08 21:51:28 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/05/10 17:28:47 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,7 @@ unsigned int	**gen_tab(unsigned int tab_size, char *user_input);
 void			up_lines(unsigned int n);
 void			ft_putchar(char c);
 void			ft_putnbr(int nb);
+void			print_tab_vu_coor(unsigned int **tab, t_coor coor, unsigned int tab_size);
 void			print_tab_vu(unsigned int **tab, unsigned int tab_size);
 void			print_tab(unsigned int **tab, unsigned int tab_size);
 
@@ -85,5 +86,11 @@ void			print_tab(unsigned int **tab, unsigned int tab_size);
 int				ft_strlen(char *str);
 int				ft_putstr_fd(int fd, char *str);
 void			free_tab(unsigned int **tab);
+void			add_manual_number(unsigned int **tab, t_coor t,
+				unsigned int box, unsigned int tab_size);
+
+//---------------SKY_EDITOR---------------//
+
+void			sky_editor(t_all *all);
 
 #endif

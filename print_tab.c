@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   print_tab.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: trgoel <trgoel@student.42.fr>              +#+  +:+       +#+        */
+/*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:24 by herolle           #+#    #+#             */
-/*   Updated: 2026/04/30 21:46:54 by trgoel           ###   ########.fr       */
+/*   Updated: 2026/05/10 17:43:34 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
+#include "sky_solver.h"
 
 void	up_lines(unsigned int n)
 {
@@ -60,6 +61,41 @@ void	print_tab_vu(unsigned int **tab, unsigned int tab_size)
 			else
 			{
 				ft_putnbr(tab[i][j]);
+				//write (1, " ", 1);
+			}
+			if (!(tab[i][j] / 10) && j != tab_size - 1)
+				(void)write(1, " ", 1);
+			++j;
+		}
+		(void)write(1, "\n", 1);
+		++i;
+	}
+}
+
+void	print_tab_vu_coor(unsigned int **tab, t_coor coor, unsigned int tab_size)
+{
+	unsigned int	i;
+	unsigned int	j;
+
+	i = 0;
+	tab_size += 2;
+	while (i < tab_size)
+	{
+		j = 0;
+		while (j < tab_size)
+		{
+			if ((j == 0 && i == 0) || (j == 0 && i == tab_size - 1)
+				|| (j == tab_size - 1 && i == 0)
+				|| (j == tab_size - 1 && i == tab_size - 1))
+				(void)write(1, " ", 1);
+			else
+			{
+				if (coor.y == i && coor.x == j)
+					ft_putstr_fd(1, "\033[1;31;47m");
+				else if (i == 0 || i == tab_size - 1 || j == 0 || j == tab_size - 1)
+					ft_putstr_fd(1, "\033[0;34m");
+				ft_putnbr(tab[i][j]);
+				ft_putstr_fd(1, "\033[0m");
 				//write (1, " ", 1);
 			}
 			if (!(tab[i][j] / 10) && j != tab_size - 1)
