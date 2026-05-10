@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:10 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 20:21:21 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 20:53:43 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,6 @@ int		no_input(unsigned int **tab, unsigned int tab_size, char *user_input)
 {
 	t_coor	coor;
 
-	while (*user_input && *user_input != ' ')
-		++user_input;
-	if (*user_input)
-		return (0);
 	coor.y = 0;
 	while (coor.y < tab_size)
 	{
@@ -69,6 +65,10 @@ int		no_input(unsigned int **tab, unsigned int tab_size, char *user_input)
 			tab[coor.y][coor.x++] = 0;
 		++coor.y;
 	}
+	while (*user_input && *user_input != ' ')
+		++user_input;
+	if (*user_input)
+		return (0);
 	return (1);
 }
 

@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 20:57:10 by ldebarno          #+#    #+#             */
-/*   Updated: 2026/05/10 20:39:59 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 20:43:12 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	check_nbl(unsigned int *tab, unsigned int tab_size)
 	i = 1;
 	while (i < tab_size - 1)
 	{
-		if (tab[i] < 0 || tab[i] > tab_size)
+		if (tab[i] > tab_size)
 			return (0);
 		i++;
 	}
@@ -68,7 +68,7 @@ int	check_nbc(unsigned int **tab, unsigned int tab_size, unsigned int index)
 	i = 1;
 	while (i < tab_size - 1)
 	{
-		if (tab[i][index] < 0 || tab[i][index] > tab_size)
+		if (tab[i][index] > tab_size)
 			return (0);
 		i++;
 	}

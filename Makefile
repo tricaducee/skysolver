@@ -2,13 +2,16 @@ SRCS	:= check_tab.c  check_vue.c  gen_tab.c  main.c  print_tab.c  sky_solver.c  
 BIN_DIR	:= ./bin
 OBJS	:= $(SRCS:%.c=$(BIN_DIR)/%.o)
 
-FLAGS	:= -Wall -Wextra -g
+FLAGS	:= -Wall -Wextra -g -fsanitize=address
 CC		:= /usr/bin/gcc
 
 TARGET	:= sky
 
 ifeq ($(ANIMATE),1)
 	FLAGS += -DANIMATE
+endif
+ifeq ($(EDITOR),1)
+	FLAGS += -DEDITOR
 endif
 
 ifeq ($(OPTI),1)

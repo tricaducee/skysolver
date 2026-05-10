@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:34 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 20:07:52 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 23:47:18 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,22 @@ int	is_end(unsigned int curr_i, unsigned int path_size)
 	return (0);
 }
 
-int	check_column_and_line_bit_shift(unsigned int **tab, t_coor coor, unsigned int tab_size, unsigned int box)
+int	check_column_and_line_bit_shift(unsigned int full_flag, unsigned int **tab, t_coor coor, unsigned int tab_size, unsigned int box)
 {
 	const unsigned int	i = (1 << (box - 1));
 	const unsigned int	delta = tab_size + 2;
+	int					ret =  1;
+	(void)full_flag;
 
 	if (!(tab[delta][coor.x] & i) && !(tab[coor.y][delta] & i))
 	{
 		tab[delta][coor.x] |= i;
 		tab[coor.y][delta] |= i;
-		return (1);
+		if (tab[delta][coor.x] == full_flag)
+			ret = check_vue_column_final(tab, coor, tab_size) && check_vue_column_rev(tab, coor, tab_size);
+		if (ret && tab[coor.y][delta] == full_flag)
+			return (check_vue_line_final(tab, coor, tab_size) && check_vue_line_rev(tab, coor, tab_size));
+		return (ret);
 	}
 	return (0);
 }
@@ -46,15 +52,20 @@ unsigned int	put_box(t_all *all, t_coor coor, unsigned int box)
 	while (1)
 	{
 		tab[coor.y][coor.x] = box;
-		if (check_column_and_line_bit_shift(tab, coor, all->tab_size, box)
+		if (check_column_and_line_bit_shift(all->full_flag, all->map, coor, all->tab_size, box)
+			// && check_line_vue_lower_bound(all, coor)
+			// 	//&& check_line_vue_lower_bound_rev(all, coor)
+			// && check_line_vue_upper_bound(all, coor)
+			// 	//&& check_line_vue_upper_bound_rev(all, coor)
+			// && check_col_vue_lower_bound(all, coor)
+			// 	//&& check_col_vue_lower_bound_rev(all, coor)
+			// && check_col_vue_upper_bound(all, coor)
+				//&& check_col_vue_upper_bound_rev(all, coor)
+			//&& all->map[][] all->full_flag check_vue_line(tab, coor, all->tab_size)
 			&& check_vue_line(tab, coor, all->tab_size)
-			&& check_line_vue_lower_bound(all, coor)
-			&& check_line_vue_upper_bound(all, coor)
-			&& check_col_vue_lower_bound(all, coor)
-			&& check_col_vue_upper_bound(all, coor)
-			//&& check_vue_column(tab, coor, all->tab_size)
-			//&& check_vue_line_rev(tab, coor, all->tab_size)
-			//&& check_vue_column_rev(tab, coor, all->tab_size)
+			&& check_vue_column(tab, coor, all->tab_size)
+			// && check_vue_line_rev(tab, coor, all->tab_size)
+			// && check_vue_column_rev(tab, coor, all->tab_size)
 		)
 			return (box);
 		tab[all->tab_size + 2][coor.x] = boxes_save.x;

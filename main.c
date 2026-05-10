@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 20:34:13 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 23:46:24 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ void	pre_compute_lines(unsigned int **tab, unsigned int tab_size)
 	val = 1;
 	while (val <= tab_size)
 	{
-		box = tab_size - (tab[val][0] - 1);
+		box = !tab[val][0] ? tab_size : tab_size - (tab[val][0] - 1);
 		i = 1;
-		end_i = tab_size - (tab[val][tab_size + 1] - 1);
+		end_i = !tab[val][tab_size + 1] ? tab_size : tab_size - (tab[val][tab_size + 1] - 1);
 		while (box < tab_size)
 			tab[val][i++] = box++;
 		while (i < end_i)
@@ -53,9 +53,9 @@ void	pre_compute_column(unsigned int **tab, unsigned int tab_size)
 	val = 1;
 	while (val <= tab_size)
 	{
-		box = tab_size - (tab[0][val] - 1);
+		box = !tab[0][val] ? tab_size : tab_size - (tab[0][val] - 1);
 		i = 1;
-		end_i = tab_size - (tab[tab_size + 1][val] - 1);
+		end_i = !tab[tab_size + 1][val] ? tab_size : tab_size - (tab[tab_size + 1][val] - 1);
 		while (box < tab_size)
 			tab[i++][val] = box++;
 		while (i < end_i)
@@ -246,7 +246,7 @@ void	add_manual_number(unsigned int **tab, t_coor t,
 
 }
 
-int	get_path(t_all *all)
+int	get_path_heur(t_all *all)
 {
 	const unsigned int	tab_size = all->tab_size;
 	t_coor			i;
@@ -258,7 +258,7 @@ int	get_path(t_all *all)
 	//curr_max = all->tab_size;
 	curr_max = 1;
 	all->path_size = 0;
-	while (curr_max >= 1)
+	while (curr_max <= all->tab_size)
 	{
 		i.y = 1;
 		while (i.y <= tab_size)
@@ -266,46 +266,41 @@ int	get_path(t_all *all)
 			i.x = 1;
 			while (i.x <= tab_size)
 			{
-				if (all->map[i.y][i.x] == 0)
+				if (all->heatmap[i.y][i.x] == curr_max && all->map[i.y][i.x] == 0)
+				//if (all->map[i.y][i.x] == 0)
 					all->path_priority[all->path_size++] = i;
 				i.x++;
 			}
 			i.y++;
 		}
-		--curr_max;
+		++curr_max;
 	}
 	return (0);
 }
 
-// int	get_path(t_all *all)
-// {
-// 	const unsigned int	tab_size = all->tab_size;
-// 	t_coor			i;
-// 	unsigned int	curr_max;
+int	get_path(t_all *all)
+{
+	const unsigned int	tab_size = all->tab_size;
+	t_coor			i;
 
-// 	all->path_priority = malloc(sizeof(t_coor) * (all->square_tab_size));
-// 	if (!all->path_priority)
-// 		return (printf("sa mrsh pa (malloc)\n"));
-// 	curr_max = tab_size;
-// 	all->path_size = 0;
-// 	while (curr_max >= 1)
-// 	{
-// 		i.y = 1;
-// 		while (i.y <= tab_size)
-// 		{
-// 			i.x = 1;
-// 			while (i.x <= tab_size)
-// 			{
-// 				if (all->heatmap[i.y][i.x] == curr_max && all->map[i.y][i.x] == 0)
-// 					all->path_priority[all->path_size++] = i;
-// 				i.x++;
-// 			}
-// 			i.y++;
-// 		}
-// 		--curr_max;
-// 	}
-// 	return (0);
-// }
+	all->path_priority = malloc(sizeof(t_coor) * (all->square_tab_size));
+	if (!all->path_priority)
+		return (printf("sa mrsh pa (malloc)\n"));
+	all->path_size = 0;
+	i.y = 1;
+	while (i.y <= tab_size)
+	{
+		i.x = 1;
+		while (i.x <= tab_size)
+		{
+			if (all->map[i.y][i.x] == 0)
+				all->path_priority[all->path_size++] = i;
+			i.x++;
+		}
+		i.y++;
+	}
+	return (0);
+}
 
 void	print_paths(t_all *all)
 {
@@ -331,15 +326,24 @@ int last_check(t_all *all)
 		coor.x = 0;
 		while (++coor.x <= tab_size)
 		{
-			if (!check_vue_line(all->map, coor, tab_size)
-				//|| !check_vue_line_rev(all->map, coor, tab_size)
-				|| !check_vue_column(all->map, coor, tab_size)
-				//|| !check_vue_column_rev(all->map, coor, tab_size)
+			if (//!check_vue_line(all->map, coor, tab_size)
+				!check_vue_line_rev(all->map, coor, tab_size)
+				//|| !check_vue_column(all->map, coor, tab_size)
+				|| !check_vue_column_rev(all->map, coor, tab_size)
 			)
 				return (1);
 		}
 	}
 	return (0);
+}
+
+int	free_all(t_all *all, unsigned int **tab[3])
+{
+	free(all->path_priority);
+	free_tab(tab[0]);
+	free_tab(tab[1]);
+	free_tab(tab[2]);
+	return (1);
 }
 
 int	main(int ac, char **av)
@@ -352,9 +356,10 @@ int	main(int ac, char **av)
 	if (ac != 2)
 		return (ft_putstr_fd(2, "Error, incorrect number of arguments\n"));
 	tab_size = check_input(av[1]);
-	printf("tab_size = %u\n", tab_size);
 	if (!tab_size)
 		return (ft_putstr_fd(2, "Error, the grid cannot be square or is too small\n"));
+	if (tab_size > TAB_SIZE_LIMIT)
+		return (ft_putstr_fd(2, "Error, the grid is too big\n"));
 	if (gen_tabs(tab, tab_size, av))
 		return (1);
 	if (!check_tab(tab[0], tab_size + 2))
@@ -363,16 +368,10 @@ int	main(int ac, char **av)
 	all.heatmap = tab[1];
 	all.square_tab_size = tab_size * tab_size;
 	all.tab_size = tab_size;
-	// add_manual_number(all.map, (t_coor){1, 1}, 4, all.tab_size);
-	// add_manual_number(all.map, (t_coor){3, 2}, 1, all.tab_size);
-	// add_manual_number(all.map, (t_coor){3, 4}, 5, all.tab_size);
-	// add_manual_number(all.map, (t_coor){2, 4}, 1, all.tab_size);
-	// add_manual_number(all.map, (t_coor){5, 5}, 3, all.tab_size);
-	// add_manual_number(all.map, (t_coor){7, 3}, 4, all.tab_size);
-	// add_manual_number(all.map, (t_coor){4, 2}, 7, all.tab_size);
-	sky_editor(&all);
-	// write(1, "\n", 1);
-	//print_tab_vu(tab[0], tab_size);
+	all.full_flag = (1U << (tab_size + 1)) - 1;
+	#ifdef EDITOR
+		sky_editor(&all);
+	#endif
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	pre_generate(tab, tab_size);
 	if (get_path(&all))
@@ -380,21 +379,21 @@ int	main(int ac, char **av)
 	//print_paths(&all);
 	//printf("%u\n", all.path_size);
 	if (!sky_solver(&all, 0))
-		return (ft_putstr_fd(2, "\033[0;31mError\n"));
+		return (free_all(&all, tab), ft_putstr_fd(2, "\033[0;31mError\n"));
 	else
 	{
 		clock_gettime(CLOCK_MONOTONIC, &end);
-		#ifndef ANIMATE
-		up_lines(tab_size + 3);
+		#ifdef EDITOR
+			#ifndef ANIMATE
+				up_lines(tab_size + 3);
+			#endif
 		#endif
-		if (last_check(&all))
-			printf("Failed last check. something is wrong                                                             \n");
+		// if (last_check(&all))
+		// 	printf("Failed last check. something is wrong                                                             \n");
 		print_tab_vu_coor(tab[0], (t_coor){0, 0}, tab_size);
 		printf("Solved in : %lf secondes\n", (end.tv_sec - start.tv_sec) + 
                           (end.tv_nsec - start.tv_nsec) / 1000000000.0);
 	}
-	free_tab(tab[0]);
-	free_tab(tab[1]);
-	free_tab(tab[2]);
+	free_all(&all, tab);
 	return (0);
 }
