@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 20:57:10 by ldebarno          #+#    #+#             */
-/*   Updated: 2026/05/10 20:09:47 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 20:39:59 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,14 @@ unsigned int	check_input(char *s)
 		else if (*s)
 			return (0);
 	}
-	if (ret == 1)
-		return (ft_atoi(tmp));
-	if (ret)
+	if (!ret && *tmp >= '0' && *tmp <= '9')
+	{
+		ret = ft_atoi(tmp);
+		if (ret > 2)
+			return (ret);
+		return (0);
+	}
+	else if (ret)
 		++ret;
 	if (!(ret % 4) && (ret / 4) > 2)
 		return (ret / 4);
@@ -49,7 +54,7 @@ int	check_nbl(unsigned int *tab, unsigned int tab_size)
 	i = 1;
 	while (i < tab_size - 1)
 	{
-		if (tab[i] <= 0 || tab[i] > tab_size)
+		if (tab[i] < 0 || tab[i] > tab_size)
 			return (0);
 		i++;
 	}
@@ -63,7 +68,7 @@ int	check_nbc(unsigned int **tab, unsigned int tab_size, unsigned int index)
 	i = 1;
 	while (i < tab_size - 1)
 	{
-		if (tab[i][index] <= 0 || tab[i][index] > tab_size)
+		if (tab[i][index] < 0 || tab[i][index] > tab_size)
 			return (0);
 		i++;
 	}

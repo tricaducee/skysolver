@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 20:09:02 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/10 20:34:13 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -350,14 +350,15 @@ int	main(int ac, char **av)
 	t_all			all;
 
 	if (ac != 2)
-		return (ft_putstr_fd(2, "Error\n"));
+		return (ft_putstr_fd(2, "Error, incorrect number of arguments\n"));
 	tab_size = check_input(av[1]);
+	printf("tab_size = %u\n", tab_size);
 	if (!tab_size)
-		return (ft_putstr_fd(2, "Error\n"));
+		return (ft_putstr_fd(2, "Error, the grid cannot be square or is too small\n"));
 	if (gen_tabs(tab, tab_size, av))
 		return (1);
 	if (!check_tab(tab[0], tab_size + 2))
-		return (ft_putstr_fd(2, "Error\n"));
+		return (ft_putstr_fd(2, "Error, invalid value\n"));
 	all.map = tab[0];
 	all.heatmap = tab[1];
 	all.square_tab_size = tab_size * tab_size;
