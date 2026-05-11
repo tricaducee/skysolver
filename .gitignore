@@ -3,3 +3,7 @@ sky
 *.json
 *.svg
 args.txt
+*callgrind*
+val_out.log
+*.txt
+*.swp
