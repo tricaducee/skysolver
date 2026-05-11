@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:34 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/11 03:39:45 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/11 06:35:29 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	is_end(unsigned int curr_i, unsigned int path_size)
 
 int	check_column_and_line_bit_shift(unsigned int **tab, t_coor coor, unsigned int tab_size, unsigned int box)
 {
-	const unsigned int	i = (1 << (box - 1));
+	const unsigned int	i = (1U << (box - 1));
 	const unsigned int	delta = tab_size + 2;
 	int					ret =  1;
 	// (void)full_flag;

@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:43 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/11 03:02:34 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/11 06:43:53 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ typedef struct S_all
 	unsigned int	path_size;
 	unsigned int	full_flag;
 }	t_all;
+
+void fill_seven(unsigned int **tab, unsigned int tab_size);
 
 //---------------SKY_SOLVER---------------//
 

@@ -14,20 +14,6 @@
 #define MIN 0
 #define MAX 1
 
-// int	check_min_index(unsigned int **tab, t_coor coor,
-// 	unsigned int tab_size, unsigned int box)
-// {
-// 	int	diff;
-// 	int	result;
-
-// 	diff = tab_size - box;
-// 	result = tab[coor.y + 1][0] - diff - 1;
-// 	if ((int)coor.x < result)
-// 		return (0);
-// 	result = tab[0][coor.x + 1] - diff - 1;
-// 	return (!((int)coor.y < result));
-// }
-
 int	check_min_index(unsigned int **tab, t_coor coor, unsigned int box)
 {
 	return (box <= tab[coor.y][coor.x]);
@@ -77,7 +63,8 @@ int	smart_check_vue_line(t_all *all, t_coor coor, unsigned int tab_size)
 	{
 		if (tab[coor.y][i])
 			actual_size[MIN] = actual_size[MAX] = tab[coor.y][i];
-		else {
+		else
+		{
 			max_box = max_tab[coor.y][i];
 			min_box = 1;
 			actual_size[MIN] = get_max_box(&max_box, &unavailable_box[MIN]);

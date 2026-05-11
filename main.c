@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/11 04:56:45 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/11 07:23:50 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	smart_replace_line(unsigned int	**tab, unsigned int **locked_tab, unsigned 
 	i = 0;
 	while (++i <= tab_size)
 	{
-		if (!(locked_tab[i][tab_size + 2] & (1 << box)))
+		if (!(locked_tab[i][tab_size + 2] & (1U << box)))
 			continue;
 		j = 0;
 		count_box = 0;
@@ -81,8 +81,8 @@ void	smart_replace_line(unsigned int	**tab, unsigned int **locked_tab, unsigned 
 		if (count_box == 1)
 		{
 			locked_tab[i][unique_i] = box;
-			locked_tab[i][tab_size + 2] |= (1 << lower_box);
-			locked_tab[tab_size + 2][unique_i] |= (1 << lower_box);
+			locked_tab[i][tab_size + 2] |= (1U << lower_box);
+			locked_tab[tab_size + 2][unique_i] |= (1U << lower_box);
 			j = 0;
 			while (++j <= tab_size)
 			{
@@ -104,7 +104,7 @@ void	smart_replace_col(unsigned int	**tab, unsigned int **locked_tab, unsigned i
 	i = 0;
 	while (++i <= tab_size)
 	{
-		if (!(locked_tab[tab_size + 2][i] & (1 << box)))
+		if (!(locked_tab[tab_size + 2][i] & (1U << box)))
 			continue;
 		j = 0;
 		count_box = 0;
@@ -120,8 +120,8 @@ void	smart_replace_col(unsigned int	**tab, unsigned int **locked_tab, unsigned i
 		if (count_box == 1)
 		{
 			locked_tab[unique_i][i] = box;
-			locked_tab[tab_size + 2][i] |= (1 << lower_box);
-			locked_tab[unique_i][tab_size + 2] |= (1 << lower_box);
+			locked_tab[tab_size + 2][i] |= (1U << lower_box);
+			locked_tab[unique_i][tab_size + 2] |= (1U << lower_box);
 			j = 0;
 			while (++j <= tab_size)
 			{
@@ -204,6 +204,20 @@ void	fuse_tabs(unsigned int	**tab[3], unsigned int tab_size)
 	}
 }
 
+void fill_seven(unsigned int **tab, unsigned int tab_size)
+{
+	unsigned int i;
+	unsigned int j;
+
+	i = 0;
+	while (++i <= tab_size)
+	{
+		j = 0;
+		while (++j <= tab_size)
+			tab[i][j] = tab_size;
+	}
+}
+
 void	pre_generate(unsigned int **tab[3], unsigned int tab_size)
 {
 	//unsigned int	box;
@@ -232,17 +246,16 @@ void	add_manual_number(unsigned int **tab, t_coor t,
 	{
 		if (tab[t.y][t.x])
 		{
-			tab[tab_size + 2][t.x] &= ~(1 << (tab[t.y][t.x] - 1));
-			tab[t.y][tab_size + 2] &= ~(1 << (tab[t.y][t.x] - 1));
+			tab[tab_size + 2][t.x] &= ~(1U << (tab[t.y][t.x] - 1));
+			tab[t.y][tab_size + 2] &= ~(1U << (tab[t.y][t.x] - 1));
 		}
 		if (box)
 		{
-			tab[tab_size + 2][t.x] |= 1 << (box - 1);
-			tab[t.y][tab_size + 2] |= 1 << (box - 1);
+			tab[tab_size + 2][t.x] |= 1U << (box - 1);
+			tab[t.y][tab_size + 2] |= 1U << (box - 1);
 		}
 	}
 	tab[t.y][t.x] = box;
-
 }
 
 int	get_path_heur_rev(t_all *all)
@@ -399,6 +412,14 @@ int	main(int ac, char **av)
 	#ifdef EDITOR
 		sky_editor(&all);
 	#endif
+	// fill_seven(all.heatmap, tab_size);
+	// for (int i = 0; i < 5; ++i)
+	// 	write(1, "\n", 1);
+	// print_tab_vu_coor(all.map, (t_coor){0, 0}, tab_size);
+	// printf("Heatmap:\n");
+	// print_tab_vu_coor(all.heatmap, (t_coor){0, 0}, tab_size);
+	// for (int i = 0; i < 5; ++i)
+	// 	write(1, "\n", 1);
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	pre_generate(tab, tab_size);
 	if (get_path(&all))

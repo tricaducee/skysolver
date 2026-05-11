@@ -70,18 +70,21 @@ def display_clues_in_file(clues, outfile:str):
             f.write(str(number) + " ")
         for number in left:
             f.write(str(number) + " ")
-        for number in right:
+        for number in right[:-1]:
             f.write(str(number) + " ")
+        f.write(str(right[-1]))
         f.write("\n")
 
 def main():
     parser = argparse.ArgumentParser(description="Generate Skyscraper Puzzles")
     parser.add_argument("-c", "--count", type=int, help="Number of grids to generate", default=1)
     parser.add_argument("-s", "--size", type=int, help="Size of the grid (e.g., 4 for a 4x4)", default=8)
-    parser.add_argument("-o", "--outfile", type=int, help="Size of the grid (e.g., 4 for a 4x4)", default=8)
+    parser.add_argument("-o", "--outfile", type=str, help="Name of the file")
     
     args = parser.parse_args()
     
+    if not args.outfile:
+        args.outfile = f"{args.size}x{args.size}.txt"
     generated_grids = set()
     attempts = 0
     
@@ -92,7 +95,7 @@ def main():
         if grid_tuple not in generated_grids:
             generated_grids.add(grid_tuple)
             clues = get_clues(grid, args.size)
-            display_clues_in_file(clues, f"{args.size}x{args.size}.txt")
+            display_clues_in_file(clues, str(args.outfile))
         
         attempts += 1
 
