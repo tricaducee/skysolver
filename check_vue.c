@@ -6,11 +6,13 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 17:27:39 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 23:45:34 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/11 04:37:57 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "sky_solver.h"
+#define MIN 0
+#define MAX 1
 
 // int	check_min_index(unsigned int **tab, t_coor coor,
 // 	unsigned int tab_size, unsigned int box)
@@ -31,281 +33,225 @@ int	check_min_index(unsigned int **tab, t_coor coor, unsigned int box)
 	return (box <= tab[coor.y][coor.x]);
 }
 
-void	set_vars(unsigned int a[2], unsigned int b[2], unsigned int c[2], unsigned int d[2])
+unsigned int	get_max_box(unsigned int *max_box, unsigned int *unavailable_box)
 {
-	a[0] = 0;
-	a[1] = 0;
-	b[0] = 0;
-	b[1] = 0;
-	c[0] = 0;
-	c[1] = 0;
-	d[0] = 0;
-	d[1] = 0;
+	while (*max_box > 1 && ((1U << (*max_box - 1)) & *unavailable_box))
+		--*max_box;
+	*unavailable_box |= 1U << (*max_box - 1);
+	return (*max_box);
 }
 
-int	check_col_vue_lower_bound(t_all *all, t_coor coor)
+unsigned int	get_min_box(unsigned int *min_box, unsigned int *unavailable_box, unsigned int tab_size)
 {
-	unsigned int	i;
-	unsigned int	h[2];
-	unsigned int	first_zero[2];
-	unsigned int	max[2];
+	while (*min_box < tab_size && ((1U << (*min_box - 1)) & *unavailable_box))
+		++*min_box;
+	*unavailable_box |= 1U << (*min_box - 1);
+	return (*min_box);
+}
+
+int	smart_check_vue_line(t_all *all, t_coor coor, unsigned int tab_size)
+{
+	unsigned int	**tab = all->map;
+	unsigned int	**max_tab = all->heatmap;
 	unsigned int	vue[2];
-
-	i = 0;
-	set_vars(h, first_zero, max, vue);
-	while (++i <= all->tab_size)
-	{
-		h[0] = all->map[i][coor.x];
-		if (h[0] == 0 && !first_zero[0])
-		{
-			h[0] = all->heatmap[i][coor.x];
-			first_zero[0] = 1;
-		}
-		if (h[0] > max[0])
-		{
-			max[0] = h[0];
-			vue[0]++;
-		}
-		h[1] = all->map[all->tab_size + 1 - i][coor.x];
-		if (h[1] == 0 && !first_zero[1])
-		{
-			h[1] = all->heatmap[all->tab_size + 1 - i][coor.x];
-			first_zero[1] = 1;
-		}
-		if (h[1] > max[1])
-		{
-			max[1] = h[1];
-			vue[1]++;
-		}
-	}
-	return ((vue[0] <= all->map[0][coor.x]) && (vue[1] <= all->map[all->tab_size + 1][coor.x]));
-}
-
-
-int	check_col_vue_upper_bound(t_all *all, t_coor coor)
-{
+	unsigned int	target_vue;
+	unsigned int	max_size[2];
+	unsigned int	actual_size[2];
+	unsigned int	max_box = tab_size;
+	unsigned int	min_box = 1;
+	unsigned int	unavailable_box[3];
 	unsigned int	i;
-	unsigned int	h[2];
-	unsigned int	first_zero[2];
-	unsigned int	max[2];
-	unsigned int	vue[2];
 
-	i = 0;
-	set_vars(h, first_zero, max, vue);
-	while (++i <= all->tab_size)
+	target_vue = tab[coor.y][0];
+	if (!target_vue)
+		return (1);
+	i = 1;
+	max_size[MIN] = 0;
+	max_size[MAX] = 0;
+	vue[MIN] = 0;
+	vue[MAX] = 0;
+	unavailable_box[2] = tab[coor.y][tab_size + 2];
+	unavailable_box[MIN] = unavailable_box[2];
+	unavailable_box[MAX] = unavailable_box[MIN];
+	while (i <= tab_size)
 	{
-		h[0] = all->map[i][coor.x];
-		if (h[0] == 0)
-		{
-			h[0] = all->heatmap[i][coor.x];
-			vue[0]++;
+		if (tab[coor.y][i])
+			actual_size[MIN] = actual_size[MAX] = tab[coor.y][i];
+		else {
+			max_box = max_tab[coor.y][i];
+			min_box = 1;
+			actual_size[MIN] = get_max_box(&max_box, &unavailable_box[MIN]);
+			actual_size[MAX] = get_min_box(&min_box, &unavailable_box[MAX], tab_size);
 		}
-		else if (h[0] >= max[0])
+		if (actual_size[MIN] > max_size[MIN])
 		{
-			max[0] = h[0];
-			vue[0]++;
+			max_size[MIN] = actual_size[MIN];
+			++vue[MIN];
 		}
-		h[1] = all->map[all->tab_size + 1 - i][coor.x];
-		if (h[1] == 0)
+		if (actual_size[MAX] > max_size[MAX])
 		{
-			h[1] = all->heatmap[all->tab_size + 1 - i][coor.x];
-			vue[1]++;
+			max_size[MAX] = actual_size[MAX];
+			++vue[MAX];
 		}
-		else if (h[1] >= max[1])
-		{
-			max[1] = h[1];
-			vue[1]++;
-		}
+		++i;
 	}
-	return ((vue[0] >= all->map[0][coor.x]) && (vue[1] >= all->map[all->tab_size + 1][coor.x]));
+	if (unavailable_box[2] == all->full_flag)
+		return (target_vue == vue[MIN]);
+	return (target_vue >= vue[MIN] && target_vue <= vue[MAX]);
 }
 
-// int	check_col_vue_lower_bound_rev(t_all *all, t_coor coor)
-// {
-// 	unsigned int	i;
-// 	unsigned int	h[2];
-// 	unsigned int	first_zero[2];
-// 	unsigned int	max[2];
-// 	unsigned int	vue[2];
-
-// 	i = all->tab_size + 1;
-// 	set_vars(h, first_zero, max, vue);
-// 	while (--i >= 1)
-// 	{
-// 		h[1] = all->map[i][coor.x];
-// 		if (h[1] == 0 && !first_zero[1])
-// 		{
-// 			h[1] = all->heatmap[i][coor.x];
-// 			first_zero[1] = 1;
-// 		}
-// 		if (h[1] > max[1])
-// 		{
-// 			max[1] = h[1];
-// 			vue[1]++;
-// 		}
-// 	}
-// 	return ((vue[1] <= all->map[all->tab_size + 1][coor.x]));
-// }
-
-
-// int	check_col_vue_upper_bound_rev(t_all *all, t_coor coor)
-// {
-// 	unsigned int	i;
-// 	unsigned int	h[2];
-// 	unsigned int	first_zero[2];
-// 	unsigned int	max[2];
-// 	unsigned int	vue[2];
-
-// 	i = all->tab_size + 1;
-// 	set_vars(h, first_zero, max, vue);
-// 	while (--i >= 1)
-// 	{
-// 		h[1] = all->map[all->tab_size + 1 - i][coor.x];
-// 		if (h[1] == 0)
-// 		{
-// 			h[1] = all->heatmap[all->tab_size + 1 - i][coor.x];
-// 			vue[1]++;
-// 		}
-// 		else if (h[1] >= max[1])
-// 		{
-// 			max[1] = h[1];
-// 			vue[1]++;
-// 		}
-// 	}
-// 	return ((vue[1] >= all->map[all->tab_size + 1][coor.x]));
-// }
-
-
-int	check_line_vue_lower_bound(t_all *all, t_coor coor)
+int	smart_check_vue_column(t_all *all, t_coor coor, unsigned int tab_size)
 {
-	unsigned int	i;
-	unsigned int	h[2];
-	unsigned int	first_zero[2];
-	unsigned int	max[2];
+	unsigned int	**tab = all->map;
+	unsigned int	**max_tab = all->heatmap;
 	unsigned int	vue[2];
+	unsigned int	target_vue;
+	unsigned int	max_size[2];
+	unsigned int	actual_size[2];
+	unsigned int	max_box = tab_size;
+	unsigned int	min_box = 1;
+	unsigned int	unavailable_box[3];
+	unsigned int	i;
 
-	i = 0;
-	set_vars(h, first_zero, max, vue);
-	while (++i <= all->tab_size)
+	target_vue = tab[0][coor.x];
+	if (!target_vue)
+		return (1);
+	i = 1;
+	max_size[MIN] = 0;
+	max_size[MAX] = 0;
+	vue[MIN] = 0;
+	vue[MAX] = 0;
+	unavailable_box[2] = tab[tab_size + 2][coor.x];
+	unavailable_box[MIN] = unavailable_box[2];
+	unavailable_box[MAX] = unavailable_box[MIN];
+	while (i <= tab_size)
 	{
-		h[0] = all->map[coor.y][i];
-		if (h[0] == 0 && !first_zero[0])
-		{
-			h[0] = all->heatmap[coor.y][i];
-			first_zero[0] = 1;
+		if (tab[i][coor.x])
+			actual_size[MIN] = actual_size[MAX] = tab[i][coor.x];
+		else {
+			max_box = max_tab[i][coor.x];
+			min_box = 1;
+			actual_size[MIN] = get_max_box(&max_box, &unavailable_box[MIN]);
+			actual_size[MAX] = get_min_box(&min_box, &unavailable_box[MAX], tab_size);
 		}
-		if (h[0] > max[0])
+		if (actual_size[MIN] > max_size[MIN])
 		{
-			max[0] = h[0];
-			vue[0]++;
+			max_size[MIN] = actual_size[MIN];
+			++vue[MIN];
 		}
-		h[1] = all->map[coor.y][all->tab_size + 1 - i];
-		if (h[1] == 0 && !first_zero[1])
+		if (actual_size[MAX] > max_size[MAX])
 		{
-			h[1] = all->heatmap[coor.y][all->tab_size + 1 - i];
-			first_zero[1] = 1;
+			max_size[MAX] = actual_size[MAX];
+			++vue[MAX];
 		}
-		if (h[1] > max[1])
-		{
-			max[1] = h[1];
-			vue[1]++;
-		}
+		++i;
 	}
-	return ((vue[0] <= all->map[coor.y][0]) && (vue[1] <= all->map[coor.y][all->tab_size + 1]));
+	if (unavailable_box[2] == all->full_flag)
+		return (target_vue == vue[MIN]);
+	return (target_vue >= vue[MIN] && target_vue <= vue[MAX]);
 }
 
-// int	check_line_vue_lower_bound_rev(t_all *all, t_coor coor)
-// {
-// 	unsigned int	i;
-// 	unsigned int	h[2];
-// 	unsigned int	first_zero[2];
-// 	unsigned int	max[2];
-// 	unsigned int	vue[2];
-
-// 	i = all->tab_size + 1;
-// 	set_vars(h, first_zero, max, vue);
-// 	while (--i >= 1)
-// 	{
-// 		h[1] = all->map[coor.y][i];
-// 		if (h[1] == 0 && !first_zero[1])
-// 		{
-// 			h[1] = all->heatmap[coor.y][i];
-// 			first_zero[1] = 1;
-// 		}
-// 		if (h[1] > max[1])
-// 		{
-// 			max[1] = h[1];
-// 			vue[1]++;
-// 		}
-// 	}
-// 	return ((vue[1] <= all->map[coor.y][all->tab_size + 1]));
-// }
-
-int	check_line_vue_upper_bound(t_all *all, t_coor coor)
+int	smart_check_vue_line_rev(t_all *all, t_coor coor, unsigned int tab_size)
 {
-	unsigned int	i;
-	unsigned int	h[2];
-	unsigned int	first_zero[2];
-	unsigned int	max[2];
+	unsigned int	**tab = all->map;
+	unsigned int	**max_tab = all->heatmap;
 	unsigned int	vue[2];
+	unsigned int	target_vue;
+	unsigned int	max_size[2];
+	unsigned int	actual_size[2];
+	unsigned int	max_box = tab_size;
+	unsigned int	min_box = 1;
+	unsigned int	unavailable_box[3];
+	unsigned int	i;
 
-	i = 0;
-	set_vars(h, first_zero, max, vue);
-	while (++i <= all->tab_size)
+	target_vue = tab[coor.y][tab_size + 1];
+	if (!target_vue)
+		return (1);
+	i = tab_size;
+	max_size[MIN] = 0;
+	max_size[MAX] = 0;
+	vue[MIN] = 0;
+	vue[MAX] = 0;
+	unavailable_box[2] = tab[coor.y][tab_size + 2];
+	unavailable_box[MIN] = unavailable_box[2];
+	unavailable_box[MAX] = unavailable_box[MIN];
+	while (i >= 1)
 	{
-		h[0] = all->map[coor.y][i];
-		if (h[0] == 0)
-		{
-			h[0] = all->heatmap[coor.y][i];
-			vue[0] += h[0] >= max[0];
+		if (tab[coor.y][i])
+			actual_size[MIN] = actual_size[MAX] = tab[coor.y][i];
+		else {
+			max_box = max_tab[coor.y][i];
+			min_box = 1;
+			actual_size[MIN] = get_max_box(&max_box, &unavailable_box[MIN]);
+			actual_size[MAX] = get_min_box(&min_box, &unavailable_box[MAX], tab_size);
 		}
-		else if (h[0] >= max[0])
+		if (actual_size[MIN] > max_size[MIN])
 		{
-			max[0] = h[0];
-			vue[0]++;
+			max_size[MIN] = actual_size[MIN];
+			++vue[MIN];
 		}
-		h[1] = all->map[coor.y][all->tab_size + 1 - i];
-		if (h[1] == 0)
+		if (actual_size[MAX] > max_size[MAX])
 		{
-			h[1] = all->heatmap[coor.y][all->tab_size + 1 - i];
-			vue[1] += (h[1] >= max[1]);
+			max_size[MAX] = actual_size[MAX];
+			++vue[MAX];
 		}
-		else if (h[1] >= max[1])
-		{
-			max[1] = h[1];
-			vue[1]++;
-		}
+		--i;
 	}
-	return ((vue[0] >= all->map[coor.y][0]) && (vue[1] >= all->map[coor.y][all->tab_size + 1]));
+	if (unavailable_box[2] == all->full_flag)
+		return (target_vue == vue[MIN]);
+	return (target_vue >= vue[MIN] && target_vue <= vue[MAX]);
 }
 
+int	smart_check_vue_column_rev(t_all *all, t_coor coor, unsigned int tab_size)
+{
+	unsigned int	**tab = all->map;
+	unsigned int	**max_tab = all->heatmap;
+	unsigned int	vue[2];
+	unsigned int	target_vue;
+	unsigned int	max_size[2];
+	unsigned int	actual_size[2];
+	unsigned int	max_box = tab_size;
+	unsigned int	min_box = 1;
+	unsigned int	unavailable_box[3];
+	unsigned int	i;
 
-// int	check_line_vue_upper_bound_rev(t_all *all, t_coor coor)
-// {
-// 	unsigned int	i;
-// 	unsigned int	h[2];
-// 	unsigned int	first_zero[2];
-// 	unsigned int	max[2];
-// 	unsigned int	vue[2];
-
-// 	i = all->tab_size + 1;
-// 	set_vars(h, first_zero, max, vue);
-// 	while (--i >= 1)
-// 	{
-// 		h[1] = all->map[coor.y][i];
-// 		if (h[1] == 0)
-// 		{
-// 			h[1] = all->heatmap[coor.y][i];
-// 			vue[1]++;
-// 		}
-// 		else if (h[1] >= max[1])
-// 		{
-// 			max[1] = h[1];
-// 			vue[1]++;
-// 		}
-// 	}
-// 	return ((vue[1] >= all->map[coor.y][all->tab_size + 1]));
-// }
+	unavailable_box[2] = tab[tab_size + 2][coor.x];
+	unavailable_box[MIN] = unavailable_box[2];
+	unavailable_box[MAX] = unavailable_box[MIN];
+	target_vue = tab[tab_size + 1][coor.x];
+	if (!target_vue)
+		return (1);
+	i = tab_size;
+	max_size[MIN] = 0;
+	max_size[MAX] = 0;
+	vue[MIN] = 0;
+	vue[MAX] = 0;
+	while (i >= 1)
+	{
+		if (tab[i][coor.x])
+			actual_size[MIN] = actual_size[MAX] = tab[i][coor.x];
+		else {
+			max_box = max_tab[i][coor.x];
+			min_box = 1;
+			actual_size[MIN] = get_max_box(&max_box, &unavailable_box[MIN]);
+			actual_size[MAX] = get_min_box(&min_box, &unavailable_box[MAX], tab_size);
+		}
+		if (actual_size[MIN] > max_size[MIN])
+		{
+			max_size[MIN] = actual_size[MIN];
+			++vue[MIN];
+		}
+		if (actual_size[MAX] > max_size[MAX])
+		{
+			max_size[MAX] = actual_size[MAX];
+			++vue[MAX];
+		}
+		--i;
+	}
+	if (unavailable_box[2] == all->full_flag)
+		return (target_vue == vue[MIN]);
+	return (target_vue >= vue[MIN] && target_vue <= vue[MAX]);
+}
 
 int	check_vue_line(unsigned int **tab, t_coor coor, unsigned int tab_size)
 {
@@ -318,71 +264,20 @@ int	check_vue_line(unsigned int **tab, t_coor coor, unsigned int tab_size)
 	if (!target_vue)
 		return (1);
 	i = 1;
-	max_size = 0;
-	vue = 0;
-	while (i <= tab_size && max_size != tab_size && tab[coor.y][i])
+	max_size = tab[coor.y][i];
+	vue = 1;
+	while (i < coor.x && max_size != tab_size)
 	{
-		if (tab[coor.y][i] > max_size)
+		if (tab[coor.y][++i] > max_size)
 		{
 			max_size = tab[coor.y][i];
 			if (++vue > target_vue)
 				return (0);
 		}
-		++i;
 	}
+	if (coor.x == tab_size)
+		return (vue == target_vue);
 	return (1);
-}
-
-int	check_vue_line_final(unsigned int **tab, t_coor coor, unsigned int tab_size)
-{
-	unsigned int	vue;
-	unsigned int	max_size;
-	unsigned int	target_vue;
-	unsigned int	i;
-
-	target_vue = tab[coor.y][0];
-	if (!target_vue)
-		return (1);
-	i = 1;
-	max_size = 0;
-	vue = 0;
-	while (i <= tab_size && max_size != tab_size)
-	{
-		if (tab[coor.y][i] > max_size)
-		{
-			max_size = tab[coor.y][i];
-			if (++vue > target_vue)
-				return (0);
-		}
-		++i;
-	}
-	return (vue == target_vue);
-}
-
-int	check_vue_line_rev(unsigned int **tab, t_coor coor, unsigned int tab_size)
-{
-	unsigned int	vue;
-	unsigned int	max_size;
-	unsigned int	target_vue;
-	unsigned int	i;
-
-	target_vue = tab[coor.y][tab_size + 1];
-	if (!target_vue)
-		return (1);
-	i = tab_size;
-	max_size = 0;
-	vue = 0;
-	while (i > 0 && max_size != tab_size)
-	{
-		if (tab[coor.y][i] > max_size)
-		{
-			max_size = tab[coor.y][i];
-			if (++vue > target_vue)
-				return (0);
-		}
-		--i;
-	}
-	return (vue == target_vue);
 }
 
 int	check_vue_column(unsigned int **tab, t_coor coor, unsigned int tab_size)
@@ -396,43 +291,43 @@ int	check_vue_column(unsigned int **tab, t_coor coor, unsigned int tab_size)
 	if (!target_vue)
 		return (1);
 	i = 1;
-	max_size = 0;
-	vue = 0;
-	while (i <= tab_size && max_size != tab_size && tab[i][coor.x])
+	max_size = tab[i][coor.x];
+	vue = 1;
+	while (i < coor.y && max_size != tab_size)
 	{
-		if (tab[i][coor.x] > max_size)
+		if (tab[++i][coor.x] > max_size)
 		{
 			max_size = tab[i][coor.x];
 			if (++vue > target_vue)
 				return (0);
 		}
-		++i;
 	}
+	if (coor.y == tab_size)
+		return (vue == target_vue);
 	return (1);
 }
 
-int	check_vue_column_final(unsigned int **tab, t_coor coor, unsigned int tab_size)
+int	check_vue_line_rev(unsigned int **tab, t_coor coor, unsigned int tab_size)
 {
 	unsigned int	vue;
 	unsigned int	max_size;
 	unsigned int	target_vue;
-	unsigned int	i;
+	int	i;
 
-	target_vue = tab[0][coor.x];
+	target_vue = tab[coor.y][tab_size + 1];
 	if (!target_vue)
 		return (1);
-	i = 1;
-	max_size = 0;
-	vue = 0;
-	while (i <= tab_size && max_size != tab_size)
+	i = coor.x;
+	max_size = tab[coor.y][coor.x];
+	vue = 1;
+	while (i - 1 > 0 && max_size != tab_size)
 	{
-		if (tab[i][coor.x] > max_size)
+		if (tab[coor.y][--i] > max_size)
 		{
-			max_size = tab[i][coor.x];
+			max_size = tab[coor.y][i];
 			if (++vue > target_vue)
 				return (0);
 		}
-		++i;
 	}
 	return (vue == target_vue);
 }
@@ -442,26 +337,128 @@ int	check_vue_column_rev(unsigned int **tab, t_coor coor, unsigned int tab_size)
 	unsigned int	vue;
 	unsigned int	max_size;
 	unsigned int	target_vue;
-	unsigned int	i;
+	int	i;
 
 	target_vue = tab[tab_size + 1][coor.x];
 	if (!target_vue)
 		return (1);
-	i = tab_size;
-	max_size = 0;
-	vue = 0;
-	while (i > 0 && max_size != tab_size)
+	i = coor.y;
+	max_size = tab[coor.y][coor.x];
+	vue = 1;
+	while (i - 1 > 0 && max_size != tab_size)
 	{
-		if (tab[i][coor.x] > max_size)
+		if (tab[--i][coor.x] > max_size)
 		{
 			max_size = tab[i][coor.x];
 			if (++vue > target_vue)
 				return (0);
 		}
-		--i;
 	}
 	return (vue == target_vue);
 }
+
+// int	check_vue_line_final(unsigned int **tab, unsigned int line, unsigned int tab_size)
+// {
+// 	unsigned int	vue;
+// 	unsigned int	max_size;
+// 	unsigned int	target_vue;
+// 	unsigned int	i;
+
+// 	target_vue = tab[line][0];
+// 	if (!target_vue)
+// 		return (1);
+// 	i = 1;
+// 	max_size = 0;
+// 	vue = 0;
+// 	while (i <= tab_size && max_size != tab_size)
+// 	{
+// 		if (tab[line][i] > max_size)
+// 		{
+// 			max_size = tab[line][i];
+// 			if (++vue > target_vue)
+// 				return (0);
+// 		}
+// 		++i;
+// 	}
+// 	return (vue == target_vue);
+// }
+
+// int	check_vue_column_final(unsigned int **tab, unsigned int column, unsigned int tab_size)
+// {
+// 	unsigned int	vue;
+// 	unsigned int	max_size;
+// 	unsigned int	target_vue;
+// 	unsigned int	i;
+
+// 	target_vue = tab[0][column];
+// 	if (!target_vue)
+// 		return (1);
+// 	i = 1;
+// 	max_size = 0;
+// 	vue = 0;
+// 	while (i <= tab_size && max_size != tab_size)
+// 	{
+// 		if (tab[i][column] > max_size)
+// 		{
+// 			max_size = tab[i][column];
+// 			if (++vue > target_vue)
+// 				return (0);
+// 		}
+// 		++i;
+// 	}
+// 	return (vue == target_vue);
+// }
+
+// int	check_vue_line_rev_final(unsigned int **tab, unsigned int line, unsigned int tab_size)
+// {
+// 	unsigned int	vue;
+// 	unsigned int	max_size;
+// 	unsigned int	target_vue;
+// 	unsigned int	i;
+
+// 	target_vue = tab[line][tab_size + 1];
+// 	if (!target_vue)
+// 		return (1);
+// 	i = tab_size;
+// 	max_size = 0;
+// 	vue = 0;
+// 	while (i > 0 && max_size != tab_size)
+// 	{
+// 		if (tab[line][i] > max_size)
+// 		{
+// 			max_size = tab[line][i];
+// 			if (++vue > target_vue)
+// 				return (0);
+// 		}
+// 		--i;
+// 	}
+// 	return (vue == target_vue);
+// }
+
+// int	check_vue_column_rev_final(unsigned int **tab, unsigned int column, unsigned int tab_size)
+// {
+// 	unsigned int	vue;
+// 	unsigned int	max_size;
+// 	unsigned int	target_vue;
+// 	unsigned int	i;
+
+// 	target_vue = tab[tab_size + 1][column];
+// 	if (!target_vue)
+// 		return (1);
+// 	i = tab_size;
+// 	max_size = 0;
+// 	vue = 0;
+// 	while (i >= 0 && max_size != tab_size)
+// 	{
+// 		if (tab[--i][column] > max_size)
+// 		{
+// 			max_size = tab[i][column];
+// 			if (++vue > target_vue)
+// 				return (0);
+// 		}
+// 	}
+// 	return (vue == target_vue);
+// }
 
 
 // int	check_vue_column(unsigned int **tab,

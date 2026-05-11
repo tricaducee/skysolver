@@ -6,14 +6,14 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:43 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 23:49:43 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/11 03:02:34 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SKY_SOLVER_H
 # define SKY_SOLVER_H
 # include <stdio.h>
-# define TAB_SIZE_LIMIT 9
+# define TAB_SIZE_LIMIT 20
 
 typedef struct S_coor
 {
@@ -35,7 +35,7 @@ typedef struct S_all
 //---------------SKY_SOLVER---------------//
 
 int				is_end(unsigned int curr_i, unsigned int square_tab_size);
-int				check_column_and_line_bit_shift(unsigned int full_flag, unsigned int **tab,
+int				check_column_and_line_bit_shift(unsigned int **tab,
 					t_coor coor, unsigned int tab_size, unsigned int box);
 unsigned int	put_box(t_all *all, t_coor curr, unsigned int box);
 int				sky_solver(t_all *all, unsigned int curr_i);
@@ -56,15 +56,24 @@ int				check_min_index(unsigned int **tab,
 int				check_vue_column(unsigned int **tab,
 					t_coor coor, unsigned int tab_size);
 int				check_vue_column_final(unsigned int **tab,
-					t_coor coor, unsigned int tab_size);
+					unsigned int column, unsigned int tab_size);
 int				check_vue_column_rev(unsigned int **tab,
 					t_coor coor, unsigned int tab_size);
+int				check_vue_column_rev_final(unsigned int **tab,
+					unsigned int column, unsigned int tab_size);
 int				check_vue_line(unsigned int **tab,
 					t_coor coor, unsigned int tab_size);
 int				check_vue_line_final(unsigned int **tab,
-					t_coor coor, unsigned int tab_size);
+					unsigned int line, unsigned int tab_size);
 int				check_vue_line_rev(unsigned int **tab,
 					t_coor coor, unsigned int tab_size);
+int				check_vue_line_rev_final(unsigned int **tab,
+					unsigned int line, unsigned int tab_size);
+
+int				smart_check_vue_line(t_all *all, t_coor coor, unsigned int tab_size);
+int				smart_check_vue_column(t_all *all, t_coor coor, unsigned int tab_size);
+int				smart_check_vue_line_rev(t_all *all, t_coor coor, unsigned int tab_size);
+int				smart_check_vue_column_rev(t_all *all, t_coor coor, unsigned int tab_size);
 
 //---------------CHECK_TAB---------------//
 

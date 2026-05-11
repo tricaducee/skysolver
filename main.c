@@ -6,7 +6,7 @@
 /*   By: hermesrolle <hermesrolle@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/01 08:15:17 by herolle           #+#    #+#             */
-/*   Updated: 2026/05/10 23:46:24 by hermesrolle      ###   ########.fr       */
+/*   Updated: 2026/05/11 04:56:45 by hermesrolle      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,60 +15,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-
-void	pre_compute_lines(unsigned int **tab, unsigned int tab_size)
-{
-	unsigned int	box;
-	unsigned int	i;
-	unsigned int	end_i;
-	unsigned int	val;
-
-	val = 1;
-	while (val <= tab_size)
-	{
-		box = !tab[val][0] ? tab_size : tab_size - (tab[val][0] - 1);
-		i = 1;
-		end_i = !tab[val][tab_size + 1] ? tab_size : tab_size - (tab[val][tab_size + 1] - 1);
-		while (box < tab_size)
-			tab[val][i++] = box++;
-		while (i < end_i)
-		{
-			if (!tab[val][i])
-				tab[val][i] = box;
-			++i;
-		}
-		while (i <= tab_size)
-			tab[val][i++] = box--;
-		++val;
-	}
-}
-
-void	pre_compute_column(unsigned int **tab, unsigned int tab_size)
-{
-	unsigned int	box;
-	unsigned int	i;
-	unsigned int	end_i;
-	unsigned int	val;
-
-	val = 1;
-	while (val <= tab_size)
-	{
-		box = !tab[0][val] ? tab_size : tab_size - (tab[0][val] - 1);
-		i = 1;
-		end_i = !tab[tab_size + 1][val] ? tab_size : tab_size - (tab[tab_size + 1][val] - 1);
-		while (box < tab_size)
-			tab[i++][val] = box++;
-		while (i < end_i)
-		{
-			if (!tab[i][val])
-				tab[i][val] = box;
-			++i;
-		}
-		while (i <= tab_size)
-			tab[i++][val] = box--;
-		++val;
-	}
-}
 
 unsigned int **deepcopy(unsigned int **tab, unsigned int tab_size)
 {
@@ -186,6 +132,59 @@ void	smart_replace_col(unsigned int	**tab, unsigned int **locked_tab, unsigned i
 	}
 }
 
+void	pre_compute_lines(unsigned int **tab, unsigned int tab_size)
+{
+	unsigned int	box;
+	unsigned int	i;
+	unsigned int	end_i;
+	unsigned int	val;
+
+	val = 1;
+	while (val <= tab_size)
+	{
+		box = !tab[val][0] ? tab_size : tab_size - (tab[val][0] - 1);
+		i = 1;
+		end_i = !tab[val][tab_size + 1] ? tab_size : tab_size - (tab[val][tab_size + 1] - 1);
+		while (box < tab_size)
+			tab[val][i++] = box++;
+		while (i < end_i)
+		{
+			if (!tab[val][i])
+				tab[val][i] = box;
+			++i;
+		}
+		while (i <= tab_size)
+			tab[val][i++] = box--;
+		++val;
+	}
+}
+
+void	pre_compute_column(unsigned int **tab, unsigned int tab_size)
+{
+	unsigned int	box;
+	unsigned int	i;
+	unsigned int	end_i;
+	unsigned int	val;
+
+	val = 1;
+	while (val <= tab_size)
+	{
+		box = !tab[0][val] ? tab_size : tab_size - (tab[0][val] - 1);
+		i = 1;
+		end_i = !tab[tab_size + 1][val] ? tab_size : tab_size - (tab[tab_size + 1][val] - 1);
+		while (box < tab_size)
+			tab[i++][val] = box++;
+		while (i < end_i)
+		{
+			if (!tab[i][val])
+				tab[i][val] = box;
+			++i;
+		}
+		while (i <= tab_size)
+			tab[i++][val] = box--;
+		++val;
+	}
+}
 
 void	fuse_tabs(unsigned int	**tab[3], unsigned int tab_size)
 {
@@ -246,6 +245,36 @@ void	add_manual_number(unsigned int **tab, t_coor t,
 
 }
 
+int	get_path_heur_rev(t_all *all)
+{
+	const unsigned int	tab_size = all->tab_size;
+	t_coor			i;
+	unsigned int	curr_max;
+
+	all->path_priority = malloc(sizeof(t_coor) * (all->square_tab_size));
+	if (!all->path_priority)
+		return (printf("sa mrsh pa (malloc)\n"));
+	curr_max = all->tab_size;
+	all->path_size = 0;
+	while (curr_max <= all->tab_size)
+	{
+		i.y = 1;
+		while (i.y > 0)
+		{
+			i.x = 1;
+			while (i.x <= tab_size)
+			{
+				if (all->heatmap[i.y][i.x] == curr_max && all->map[i.y][i.x] == 0)
+					all->path_priority[all->path_size++] = i;
+				i.x++;
+			}
+			i.y++;
+		}
+		--curr_max;
+	}
+	return (0);
+}
+
 int	get_path_heur(t_all *all)
 {
 	const unsigned int	tab_size = all->tab_size;
@@ -255,7 +284,6 @@ int	get_path_heur(t_all *all)
 	all->path_priority = malloc(sizeof(t_coor) * (all->square_tab_size));
 	if (!all->path_priority)
 		return (printf("sa mrsh pa (malloc)\n"));
-	//curr_max = all->tab_size;
 	curr_max = 1;
 	all->path_size = 0;
 	while (curr_max <= all->tab_size)
@@ -267,7 +295,6 @@ int	get_path_heur(t_all *all)
 			while (i.x <= tab_size)
 			{
 				if (all->heatmap[i.y][i.x] == curr_max && all->map[i.y][i.x] == 0)
-				//if (all->map[i.y][i.x] == 0)
 					all->path_priority[all->path_size++] = i;
 				i.x++;
 			}
@@ -375,11 +402,11 @@ int	main(int ac, char **av)
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	pre_generate(tab, tab_size);
 	if (get_path(&all))
-	return (1);
+		return (1);
 	//print_paths(&all);
 	//printf("%u\n", all.path_size);
 	if (!sky_solver(&all, 0))
-		return (free_all(&all, tab), ft_putstr_fd(2, "\033[0;31mError\n"));
+		return (free_all(&all, tab), ft_putstr_fd(2, "\033[0;31mError, no solution finded\n"));
 	else
 	{
 		clock_gettime(CLOCK_MONOTONIC, &end);
